@@ -28,6 +28,7 @@ class SgtPauseAnimation(SgtSeatedAnimation):
 		return False
 
 	def on_state_update(self, state: GameState, old_state: GameState):
+		super().on_state_update(state, old_state)
 		active_player = state.get_active_player()
 		sd = self.parent.seat_definitions[active_player.seat-1] if active_player else self.parent.seat_definitions[0]
 		color_p = active_player.color if active_player else state.color_p

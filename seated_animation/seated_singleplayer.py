@@ -156,6 +156,7 @@ class SgtSeatedSingleplayerAnimation(SgtSeatedAnimation):
 		return len(self.seat_line.transitions) > 0 or self.blinks_left > 0 or self.blink_transition != None
 
 	def on_state_update(self, state: GameState, old_state: GameState):
+		super().on_state_update(state, old_state)
 		active_player = state.get_active_player()
 
 		if active_player == None:

@@ -97,6 +97,7 @@ class SgtSeatedMultiplayerAnimation(SgtSeatedAnimation):
 		return is_busy
 
 	def on_state_update(self, state: GameState, old_state: GameState):
+		super().on_state_update(state, old_state)
 		self.state = state
 		if state.state != STATE_START:
 			self.start_game_mode = None

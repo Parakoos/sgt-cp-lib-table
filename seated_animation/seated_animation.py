@@ -118,7 +118,10 @@ class SgtSeatedAnimation():
 		return (i_lower % self.length, b_low, i_upper % self.length, b_high, range(i_lower + 1, i_upper))
 
 	def on_state_update(self, state: GameState, old_state: GameState):
-		pass
+		for player in state.players:
+			if player.seat is None:
+				raise Exception("GameState has a player with no seat — your FIELD_ORDER is missing sgtPlayerSeats")
+
 
 	def on_time_reminder(self, time_reminder_count: int):
 		pass
