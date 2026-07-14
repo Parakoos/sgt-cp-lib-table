@@ -109,7 +109,11 @@ class SgtSeatedMultiplayerAnimation(SgtSeatedAnimation):
 		for seat_0, line_definition in enumerate(self.seat_definitions):
 			new_color_s = None
 			new_length = line_definition[1]
-			player = next((p for p in state.players if p.seat == seat_0+1), None)
+			player = None
+			for p in state.players:
+				if p.seat == seat_0+1:
+					player = p
+					break
 			if not isinstance(player, Player):
 				new_color_s = None
 			elif state.state == STATE_SIM_TURN:
