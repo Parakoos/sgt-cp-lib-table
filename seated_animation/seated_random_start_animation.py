@@ -92,7 +92,10 @@ class SgtSeatedRandomStartAnimation(SgtSeatedAnimation):
 		else:
 			if self.color_transition_fg == None or self.color_transition_bg == None:
 				time_left = self.end_ts - time.monotonic()
-				if time_left < START_GAME_COLOR_DURATION*2:
+				# parent.state can vanish mid-fade; fall back to the selected player's
+				# colors (which are captured on this object) instead of reaching into
+				# self.parent.state.players below.
+				if time_left < START_GAME_COLOR_DURATION*2 or self.parent.state is None:
 					self.color_transition_fg = ColorTransitionFunction(self.line.color_d, self.selected_player.color.highlight, START_GAME_COLOR_EASING(duration=time_left))
 					self.color_transition_bg = ColorTransitionFunction(self.bg_color, self.selected_player.color.dim, START_GAME_COLOR_EASING(duration=time_left))
 				else:

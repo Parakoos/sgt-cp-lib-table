@@ -74,12 +74,15 @@ class SgtSeatedMultiplayerAnimation(SgtSeatedAnimation):
 			if self.order_player_index >= 0:
 				indicated_player_lengt_percentage = BoomerangEase(REORDER_LINE_LENGTH_FRACTION, 1, REORDER_EASE, REORDER_DURATION_PER_SEAT).func(remainder_in_seconds)
 
+		# parent.state can become None mid-fade (e.g. game cleared) while this
+		# animation is still being run as the fade-out animation. Guard against it.
+		parent_state = self.parent.state
 		for seat_0, seat_line in enumerate(self.seat_lines):
 			if len(seat_line.transitions) > 0:
 				if(seat_line.transitions[0].loop()):
 					seat_line.transitions = seat_line.transitions[1:]
 			is_busy = is_busy or len(seat_line.transitions) > 0
-			seat_line.line.sparkle = self.parent.state.state == STATE_START and (seat_0+1) in self.parent.seats_with_pressed_keys
+			seat_line.line.sparkle = parent_state is not None and parent_state.state == STATE_START and (seat_0+1) in self.parent.seats_with_pressed_keys
 			if self.order_player_index == None:
 				# We must be in fully random or not-starting mode. So, full lengths for all
 				length_percentage = 1.0
@@ -153,6 +156,9 @@ class SgtSeatedMultiplayerAnimation(SgtSeatedAnimation):
 		self.blink_transition = None
 
 	def first_player_check(self):
+		if self.parent.state is None:
+			# State can vanish mid-fade; nothing to start against.
+			return
 		# Temporarily start the first-player selection on first press. Later, wait for all buttons to be pressed.
 		# all_pressed = len(self.parent.seats_with_pressed_keys) > 1
 		all_pressed = len(self.parent.seats_with_pressed_keys) > 1 and len(self.parent.state.players) == len(self.parent.seats_with_pressed_keys)

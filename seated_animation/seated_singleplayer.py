@@ -110,11 +110,15 @@ class SgtSeatedSingleplayerAnimation(SgtSeatedAnimation):
 		bg_color_int = fancy.gamma_adjust(line_fancy, brightness=self.bg_brightness).pack()
 		arr = [bg_color_int for i in range(self.length)]
 
+		# parent.state can become None mid-fade (e.g. game cleared) while this
+		# animation is still being run as the fade-out animation. Guard against it
+		# so the player line still fades out cleanly instead of crashing.
+		parent_state = self.parent.state
 		# Show minute counter
-		if self.parent.state.state == STATE_PLAYING:
+		if parent_state is not None and parent_state.state == STATE_PLAYING:
 			non_player_line_length = self.length - self.seat_line.line.length
 			player_line_edge = self.seat_line.line.midpoint + self.seat_line.line.length/2
-			min_fraction, mins = modf(self.parent.state.get_current_timings().turn_time/60)
+			min_fraction, mins = modf(parent_state.get_current_timings().turn_time/60)
 			dot_count = mins + 1
 			dots_travel_length = non_player_line_length + mins*(DOTS_WIDTH+DOTS_SEPARATION)
 			time_dots_location_progress = 1 - 2 * (min_fraction if min_fraction < 0.5 else 1-min_fraction)
@@ -130,7 +134,7 @@ class SgtSeatedSingleplayerAnimation(SgtSeatedAnimation):
 					arr[i_high] = fancy.gamma_adjust(line_fancy, brightness=b_high).pack()
 					for i_mid in mids:
 						arr[int(i_mid) % self.length] = fancy.gamma_adjust(line_fancy, brightness=max_b).pack()
-		elif self.parent.state.state == STATE_ADMIN:
+		elif parent_state is not None and parent_state.state == STATE_ADMIN:
 			# Spawn Sparks
 			if monotonic() - self.last_spawn_ts > SPARK_SPAWN_PAUSE_SEC:
 				self.last_spawn_ts = monotonic()
