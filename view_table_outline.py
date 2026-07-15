@@ -85,7 +85,11 @@ class ViewTableOutline(View):
 			elif player.action != None:
 				self._activate_singleplayer_animation()
 				return
-		raise Exception('Weird admin state...')
+		# No player has an action — an admin state we didn't anticipate. Don't raise
+		# (that would tear down the connection and show the error animation); log and
+		# fall back to the general seated (multiplayer) view.
+		log.warning('Unexpected admin state (no player has an action); falling back to multiplayer view')
+		self._activate_multiplayer_animation()
 	def switch_to_paused(self, state: GameState, old_state: GameState):
 		log.debug(f'--> Free memory: {mem_free():,} @ switch_to_paused b4')
 		collect()
@@ -94,9 +98,13 @@ class ViewTableOutline(View):
 		if not isinstance(self.animation, SgtPauseAnimation):
 			self.fade_to_new_animation(SgtPauseAnimation(self))
 	def switch_to_sandtimer_running(self, state: GameState, old_state: GameState):
-		raise Exception('Not implemented yet')
+		# Sand-timer mode is not implemented on this device. Degrade gracefully
+		# rather than raising and killing a table that will never use it.
+		log.warning('Sand-timer running state not implemented; falling back to multiplayer view')
+		self._activate_multiplayer_animation()
 	def switch_to_sandtimer_not_running(self, state: GameState, old_state: GameState):
-		raise Exception('Not implemented yet')
+		log.warning('Sand-timer not-running state not implemented; falling back to multiplayer view')
+		self._activate_multiplayer_animation()
 	def switch_to_start(self, state: GameState, old_state: GameState):
 		self._activate_multiplayer_animation()
 	def switch_to_end(self, state: GameState, old_state: GameState):

@@ -80,6 +80,9 @@ class SgtSeatedSingleplayerAnimation(SgtSeatedAnimation):
 		self.current_times = None
 		self.sparks = []
 		self.last_spawn_ts = 0
+		# Set before any animate()/on_state_update so the spark-spawn path and the
+		# no-active-player fallback below never hit an undefined attribute.
+		self.active_player = random_first_player
 		if random_first_player:
 			player_line_midpoint, player_line_length = self.seat_definitions[random_first_player.seat-1]
 			self.seat_line = LineTransition(Line(player_line_midpoint, player_line_length, random_first_player.color.highlight), [])
@@ -166,7 +169,11 @@ class SgtSeatedSingleplayerAnimation(SgtSeatedAnimation):
 		active_player = state.get_active_player()
 
 		if active_player == None:
-			raise Exception('No active player!')
+			# Unexpected: the singleplayer view was activated without an active
+			# player. Don't raise (that tears down the whole connection and forces a
+			# button-press to resume); log loudly and keep the current display.
+			log.warning('Singleplayer view has no active player; keeping current display')
+			return
 		self.active_player = active_player
 
 		player_line_midpoint, player_line_length = self.seat_definitions[active_player.seat-1]
