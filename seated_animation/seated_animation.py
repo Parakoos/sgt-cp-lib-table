@@ -67,17 +67,19 @@ class Line():
 						TransitionFunction(SPARKLE_EASINGS[1](start=1, end=0, duration=duration/2)),
 					])
 					self.sparkles.append((spark_index, sparkle_transition))
+		surviving_sparkles = []
 		for spark in self.sparkles:
 			tranny = spark[1].fns[0]
 			done = spark[1].loop()
 			if done:
-				self.sparkles.remove(spark)
-			else:
-				i = full_length_lower_bound + spark[0]
-				if lower_bound <= i < upper_bound:
-					progress = tranny.value
-					brightness = self.color_d.brightness * (1-progress) + progress
-					pixels[i % len(pixels)] = fancy.gamma_adjust(self.color_d.fancy_color, brightness=brightness).pack()
+				continue
+			surviving_sparkles.append(spark)
+			i = full_length_lower_bound + spark[0]
+			if lower_bound <= i < upper_bound:
+				progress = tranny.value
+				brightness = self.color_d.brightness * (1-progress) + progress
+				pixels[i % len(pixels)] = fancy.gamma_adjust(self.color_d.fancy_color, brightness=brightness).pack()
+		self.sparkles = surviving_sparkles
 
 	def __repr__(self):
 		facts = []

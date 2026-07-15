@@ -139,15 +139,17 @@ class SgtSeatedSingleplayerAnimation(SgtSeatedAnimation):
 					end = start + choice([1, -1]) * self.length * Spark.distance_easing(random())
 					self.sparks.append(Spark(start, end))
 			# Draw Sparks
+			surviving_sparks = []
 			for spark in self.sparks:
 				if spark.transition.loop():
-					self.sparks.remove(spark)
-				else:
-					i_low, b_low, i_high, b_high, mids = self.calc_dot(spark.location, SPARK_SPARK_WIDTH, spark.brightness)
-					arr[i_low] = max(arr[i_low], fancy.gamma_adjust(line_fancy, brightness=b_low).pack())
-					arr[i_high] = max(arr[i_high], fancy.gamma_adjust(line_fancy, brightness=b_high).pack())
-					for i_mid in mids:
-						arr[int(i_mid) % self.length] = max(arr[int(i_mid) % self.length], fancy.gamma_adjust(line_fancy, brightness=spark.brightness).pack())
+					continue
+				surviving_sparks.append(spark)
+				i_low, b_low, i_high, b_high, mids = self.calc_dot(spark.location, SPARK_SPARK_WIDTH, spark.brightness)
+				arr[i_low] = max(arr[i_low], fancy.gamma_adjust(line_fancy, brightness=b_low).pack())
+				arr[i_high] = max(arr[i_high], fancy.gamma_adjust(line_fancy, brightness=b_high).pack())
+				for i_mid in mids:
+					arr[int(i_mid) % self.length] = max(arr[int(i_mid) % self.length], fancy.gamma_adjust(line_fancy, brightness=spark.brightness).pack())
+			self.sparks = surviving_sparks
 
 		# Draw the player line and show result
 		self.seat_line.line.draw(arr)
